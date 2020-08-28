@@ -34,7 +34,7 @@ namespace ChessAPI.Controllers
         }
 
         // GET: api/Games/5/e2e4
-        public Game GetMove(int id, string move)
+        public Game PutMove(int id, string move)
         {
             Logic logic = new Logic();
             Game game = logic.MakeMove(id, move);

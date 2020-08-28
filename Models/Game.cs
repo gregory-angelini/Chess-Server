@@ -15,7 +15,7 @@ namespace ChessAPI.Models
         public string FEN { get; set; }
 
         [Required]
-        [StringLength(4)]
+        [StringLength(10)]
         public string Status { get; set; }
     }
 }

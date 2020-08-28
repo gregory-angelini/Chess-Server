@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Remoting.Messaging;
 using System.Web;
 using ChessAPI.Models;
@@ -52,6 +53,9 @@ namespace ChessAPI.Models
             if (game == null) 
                 return game;
 
+            if (game.Status != "play") // we process only running games
+                return game;
+
             Chess chess = new Chess(game.FEN);
             Chess nextChess = chess.Move(move);
 
@@ -60,7 +64,7 @@ namespace ChessAPI.Models
 
             game.FEN = nextChess.fen;
 
-            if(nextChess.IsOurKingInCheckmate())// TODO: add stalemate
+            if(nextChess.IsCheckmate() || nextChess.IsStalemate())
             {
                 game.Status = "completed";
             }
