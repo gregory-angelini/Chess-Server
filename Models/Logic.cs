@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Web;
 using ChessAPI.Models;
 using ChessCore;
@@ -35,6 +36,35 @@ namespace ChessAPI.Models
             game.Status = "play";
 
             db.Games.Add(game);
+            db.SaveChanges();
+
+            return game;
+        }
+
+        public Game GetGame(int id)
+        {
+            return db.Games.Find(id);
+        }
+
+        public Game MakeMove(int id, string move)
+        {
+            Game game = GetGame(id);
+            if (game == null) 
+                return game;
+
+            Chess chess = new Chess(game.FEN);
+            Chess nextChess = chess.Move(move);
+
+            if (nextChess.fen == game.FEN) 
+                return game;
+
+            game.FEN = nextChess.fen;
+
+            if(nextChess.IsOurKingInCheckmate())// TODO: add stalemate
+            {
+                game.Status = "completed";
+            }
+            db.Entry(game).State = System.Data.Entity.EntityState.Modified;// we commit updates to database
             db.SaveChanges();
 
             return game;

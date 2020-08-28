@@ -26,18 +26,21 @@ namespace ChessAPI.Controllers
         }
 
         // GET: api/Games/5
-        [ResponseType(typeof(Game))]
-        public IHttpActionResult GetGame(int id)
+        public Game GetGame(int id)
         {
-            Game game = db.Games.Find(id);
-            if (game == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(game);
+            Logic logic = new Logic();
+            Game game = logic.GetGame(id);
+            return game;
         }
-        
+
+        // GET: api/Games/5/e2e4
+        public Game GetMove(int id, string move)
+        {
+            Logic logic = new Logic();
+            Game game = logic.MakeMove(id, move);
+            return game;
+        }
+
         /*
         // PUT: api/Games/5
         [ResponseType(typeof(void))]
