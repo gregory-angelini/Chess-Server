@@ -33,7 +33,7 @@ namespace ChessAPI.Controllers
             return game;
         }
 
-        // GET: api/Games/5/e2e4
+        // GET: api/Games/5/Pe2e4
         public Game PutMove(int id, string move)
         {
             Logic logic = new Logic();
