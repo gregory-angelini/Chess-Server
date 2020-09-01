@@ -10,7 +10,7 @@ namespace ChessAPI.Controllers
     public class Version
     {
         public string name = "ChessAPI";
-        public string version = "0.2";
+        public string version = "0.1";
     }
 
     public class VersionController : ApiController

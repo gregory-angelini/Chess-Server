@@ -99,6 +99,9 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\GamesController.cs" />
+    <Compile Include="Controllers\MovesController.cs" />
+    <Compile Include="Controllers\PlayersController.cs" />
+    <Compile Include="Controllers\SidesController.cs" />
     <Compile Include="Controllers\VersionController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -106,6 +109,9 @@
     <Compile Include="Models\Game.cs" />
     <Compile Include="Models\Logic.cs" />
     <Compile Include="Models\ModelChessDB.cs" />
+    <Compile Include="Models\Move.cs" />
+    <Compile Include="Models\Player.cs" />
+    <Compile Include="Models\Side.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

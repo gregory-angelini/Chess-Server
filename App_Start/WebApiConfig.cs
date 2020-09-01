@@ -18,8 +18,8 @@ namespace ChessAPI
 
             // makes Web API to return JSON instead of XML
             config.Formatters.JsonFormatter.SupportedMediaTypes
-            .Add(new MediaTypeHeaderValue("text/html"));
-
+            .Add(new MediaTypeHeaderValue("application/json"));
+            
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}/{move}",

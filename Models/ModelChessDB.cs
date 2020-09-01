@@ -13,6 +13,9 @@ namespace ChessAPI.Models
         }
 
         public virtual DbSet<Game> Games { get; set; }
+        public virtual DbSet<Move> Moves { get; set; }
+        public virtual DbSet<Player> Players { get; set; }
+        public virtual DbSet<Side> Sides { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -22,7 +25,35 @@ namespace ChessAPI.Models
 
             modelBuilder.Entity<Game>()
                 .Property(e => e.Status)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Game>()
+                .Property(e => e.Result)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Move>()
+                .Property(e => e.FEN)
                 .IsFixedLength();
+
+            modelBuilder.Entity<Move>()
+                .Property(e => e.Move1)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Move>()
+                .Property(e => e.Result)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Player>()
+                .Property(e => e.GUID)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Player>()
+                .Property(e => e.Name)
+                .IsFixedLength();
+
+            modelBuilder.Entity<Side>()
+                .Property(e => e.Color)
+                .IsUnicode(false);
         }
     }
 }

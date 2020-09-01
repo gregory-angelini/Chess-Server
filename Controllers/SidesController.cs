@@ -10,53 +10,46 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using ChessAPI.Models;
 
-
 namespace ChessAPI.Controllers
 {
-    public class GamesController : ApiController
+    public class SidesController : ApiController
     {
-        ModelChessDB db = new ModelChessDB();
+        private ModelChessDB db = new ModelChessDB();
 
-        // GET: api/Games
-        public Game GetGames()
+        // GET: api/Sides
+        public IQueryable<Side> GetSides()
         {
-            Logic logic = new Logic();
-            Game game = logic.GetGame();
-            return game;
+            return db.Sides;
         }
 
-        // GET: api/Games/5
-        public Game GetGame(int id)
+        // GET: api/Sides/5
+        [ResponseType(typeof(Side))]
+        public IHttpActionResult GetSide(int id)
         {
-            Logic logic = new Logic();
-            Game game = logic.GetGame(id);
-            return game;
+            Side side = db.Sides.Find(id);
+            if (side == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(side);
         }
 
-        // PUT: api/Games/5/Pe2e4
-        public Game PutMove(int id, string move)
-        {
-            Logic logic = new Logic();
-            Game game = logic.MakeMove(id, move);
-            return game;
-        }
-
-        /*
-        // PUT: api/Games/5
+        // PUT: api/Sides/5
         [ResponseType(typeof(void))]
-        public IHttpActionResult PutGame(int id, Game game)
+        public IHttpActionResult PutSide(int id, Side side)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != game.ID)
+            if (id != side.ID)
             {
                 return BadRequest();
             }
 
-            db.Entry(game).State = EntityState.Modified;
+            db.Entry(side).State = EntityState.Modified;
 
             try
             {
@@ -64,7 +57,7 @@ namespace ChessAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!GameExists(id))
+                if (!SideExists(id))
                 {
                     return NotFound();
                 }
@@ -77,37 +70,36 @@ namespace ChessAPI.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/Games
-        [ResponseType(typeof(Game))]
-        public IHttpActionResult PostGame(Game game)
+        // POST: api/Sides
+        [ResponseType(typeof(Side))]
+        public IHttpActionResult PostSide(Side side)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.Games.Add(game);
+            db.Sides.Add(side);
             db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = game.ID }, game);
+            return CreatedAtRoute("DefaultApi", new { id = side.ID }, side);
         }
 
-        // DELETE: api/Games/5
-        [ResponseType(typeof(Game))]
-        public IHttpActionResult DeleteGame(int id)
+        // DELETE: api/Sides/5
+        [ResponseType(typeof(Side))]
+        public IHttpActionResult DeleteSide(int id)
         {
-            Game game = db.Games.Find(id);
-            if (game == null)
+            Side side = db.Sides.Find(id);
+            if (side == null)
             {
                 return NotFound();
             }
 
-            db.Games.Remove(game);
+            db.Sides.Remove(side);
             db.SaveChanges();
 
-            return Ok(game);
+            return Ok(side);
         }
-        */
 
         protected override void Dispose(bool disposing)
         {
@@ -118,9 +110,9 @@ namespace ChessAPI.Controllers
             base.Dispose(disposing);
         }
 
-        private bool GameExists(int id)
+        private bool SideExists(int id)
         {
-            return db.Games.Count(e => e.ID == id) > 0;
+            return db.Sides.Count(e => e.ID == id) > 0;
         }
     }
 }
