@@ -18,11 +18,11 @@ namespace ChessAPI.Models
         [StringLength(10)]
         public string Status { get; set; }
 
-        public int? White_side { get; set; }
+        public int? White_ID { get; set; }
 
-        public int? Black_side { get; set; }
+        public int? Black_ID { get; set; }
 
-        public int? Winner_side { get; set; }
+        public int? Winner_ID { get; set; }
 
         [StringLength(10)]
         public string Result { get; set; }

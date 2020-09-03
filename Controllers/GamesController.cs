@@ -18,96 +18,20 @@ namespace ChessAPI.Controllers
         ModelChessDB db = new ModelChessDB();
 
         // GET: api/Games
-        public Game GetGames()
+        public GameInfo GetGames()
         {
             Logic logic = new Logic();
-            Game game = logic.GetGame();
-            return game;
-        }
-
-        // GET: api/Games/5
-        public Game GetGame(int id)
-        {
-            Logic logic = new Logic();
-            Game game = logic.GetGame(id);
-            return game;
-        }
-
-        // PUT: api/Games/5/Pe2e4
-        public Game PutMove(int id, string move)
-        {
-            Logic logic = new Logic();
-            Game game = logic.MakeMove(id, move);
-            return game;
+            return logic.GetGame();
         }
 
         /*
-        // PUT: api/Games/5
-        [ResponseType(typeof(void))]
-        public IHttpActionResult PutGame(int id, Game game)
+        // GET: api/Games/5
+        public GameInfo GetGame(int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            Logic logic = new Logic();
+            return logic.GetGame(id);
+        }*/
 
-            if (id != game.ID)
-            {
-                return BadRequest();
-            }
-
-            db.Entry(game).State = EntityState.Modified;
-
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!GameExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
-        }
-
-        // POST: api/Games
-        [ResponseType(typeof(Game))]
-        public IHttpActionResult PostGame(Game game)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            db.Games.Add(game);
-            db.SaveChanges();
-
-            return CreatedAtRoute("DefaultApi", new { id = game.ID }, game);
-        }
-
-        // DELETE: api/Games/5
-        [ResponseType(typeof(Game))]
-        public IHttpActionResult DeleteGame(int id)
-        {
-            Game game = db.Games.Find(id);
-            if (game == null)
-            {
-                return NotFound();
-            }
-
-            db.Games.Remove(game);
-            db.SaveChanges();
-
-            return Ok(game);
-        }
-        */
 
         protected override void Dispose(bool disposing)
         {

@@ -16,6 +16,14 @@ namespace ChessAPI.Controllers
     {
         private ModelChessDB db = new ModelChessDB();
 
+        // GET: api/Moves/5/Pe2e4
+        public GameState GetMove(int id, string move)
+        {
+            Logic logic = new Logic();
+            return logic.GetMove(id, move);
+        }
+
+        /*
         // GET: api/Moves
         public IQueryable<Move> GetMoves()
         {
@@ -100,6 +108,7 @@ namespace ChessAPI.Controllers
 
             return Ok(move);
         }
+        */
 
         protected override void Dispose(bool disposing)
         {

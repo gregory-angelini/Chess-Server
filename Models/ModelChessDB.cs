@@ -15,7 +15,6 @@ namespace ChessAPI.Models
         public virtual DbSet<Game> Games { get; set; }
         public virtual DbSet<Move> Moves { get; set; }
         public virtual DbSet<Player> Players { get; set; }
-        public virtual DbSet<Side> Sides { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -50,10 +49,6 @@ namespace ChessAPI.Models
             modelBuilder.Entity<Player>()
                 .Property(e => e.Name)
                 .IsFixedLength();
-
-            modelBuilder.Entity<Side>()
-                .Property(e => e.Color)
-                .IsUnicode(false);
         }
     }
 }

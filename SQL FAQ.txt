@@ -1,0 +1,2 @@
+# How to reset identity?
+DBCC CHECKIDENT (players, RESEED, 0)

@@ -16,6 +16,14 @@ namespace ChessAPI.Controllers
     {
         private ModelChessDB db = new ModelChessDB();
 
+        // POST: api/Players
+        public PlayerInfo PosPlayer(Player player)
+        {
+            Logic logic = new Logic();
+            return logic.GetPlayer(player);
+        }
+
+
         /*
         // GET: api/Players/5
         [ResponseType(typeof(Player))]
@@ -28,69 +36,6 @@ namespace ChessAPI.Controllers
             {
                 return NotFound();
             }
-            return Ok(player);
-        }
-        */
-
-        // GET: api/Players
-        public Player PostPlayer(Player player)
-        {
-            Logic logic = new Logic();
-            player = logic.GetPlayer(player);
-            return player;
-        }
-
-
-        /*
-        // PUT: api/Players/5
-        [ResponseType(typeof(void))]
-        public IHttpActionResult PutPlayer(int id, Player player)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != player.ID)
-            {
-                return BadRequest();
-            }
-
-            db.Entry(player).State = EntityState.Modified;
-
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PlayerExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
-        }
-
-        
-        // DELETE: api/Players/5
-        [ResponseType(typeof(Player))]
-        public IHttpActionResult DeletePlayer(int id)
-        {
-            Player player = db.Players.Find(id);
-            if (player == null)
-            {
-                return NotFound();
-            }
-
-            db.Players.Remove(player);
-            db.SaveChanges();
-
             return Ok(player);
         }
         */
