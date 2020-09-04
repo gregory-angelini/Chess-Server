@@ -18,9 +18,9 @@ namespace ChessAPI.Models
         [StringLength(90)]
         public string FEN { get; set; }
 
-        [Column("Move")]
+        [Required]
         [StringLength(6)]
-        public string Move1 { get; set; }
+        public string FenMove { get; set; }
 
         [StringLength(10)]
         public string Result { get; set; }

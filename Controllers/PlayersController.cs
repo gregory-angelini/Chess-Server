@@ -17,28 +17,12 @@ namespace ChessAPI.Controllers
         private ModelChessDB db = new ModelChessDB();
 
         // POST: api/Players
-        public PlayerInfo PosPlayer(Player player)
+        public PlayerInfo PostPlayer(Player player)
         {
             Logic logic = new Logic();
             return logic.GetPlayer(player);
         }
 
-
-        /*
-        // GET: api/Players/5
-        [ResponseType(typeof(Player))]
-        public IHttpActionResult GetPlayer(int id)
-        {
-            Logic logic = new Logic();
-            Player player = logic.GetPlayer(id);
-
-            if (player == null)
-            {
-                return NotFound();
-            }
-            return Ok(player);
-        }
-        */
 
         protected override void Dispose(bool disposing)
         {

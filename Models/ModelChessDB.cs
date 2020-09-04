@@ -35,7 +35,7 @@ namespace ChessAPI.Models
                 .IsFixedLength();
 
             modelBuilder.Entity<Move>()
-                .Property(e => e.Move1)
+                .Property(e => e.FenMove)
                 .IsUnicode(false);
 
             modelBuilder.Entity<Move>()

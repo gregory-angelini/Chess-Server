@@ -17,20 +17,20 @@ namespace ChessAPI.Controllers
     {
         ModelChessDB db = new ModelChessDB();
 
-        // GET: api/Games
-        public GameInfo GetGames()
+        // POST: api/Games
+        public GameInfo PostGame(RequestedGame rGame)
         {
             Logic logic = new Logic();
-            return logic.GetGame();
+            return logic.GetGame(rGame);
         }
 
-        /*
+
         // GET: api/Games/5
-        public GameInfo GetGame(int id)
+        public GameState GetGame(int id)
         {
             Logic logic = new Logic();
             return logic.GetGame(id);
-        }*/
+        }
 
 
         protected override void Dispose(bool disposing)

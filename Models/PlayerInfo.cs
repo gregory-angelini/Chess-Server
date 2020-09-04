@@ -7,6 +7,7 @@ namespace ChessAPI.Models
 {
     public class PlayerInfo
     {
-        public string Name;
+        public int playerID;
+        public string playerName;
     }
 }

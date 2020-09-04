@@ -5,9 +5,9 @@ using System.Web;
 
 namespace ChessAPI.Models
 {
-    public class GameInfo
+    public class RequestedGame
     {
-        public int gameID;
-        public string FEN;
+        public int playerID;
+        public string yourColor;// white, black
     }
 }
