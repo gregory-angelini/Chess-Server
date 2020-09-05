@@ -17,27 +17,32 @@ namespace ChessAPI.Models
         ModelChessDB db = new ModelChessDB();
 
 
-        public GameInfo GetGame(RequestedGame rGame)
+        public GameInfo GetGame(RequestedGame r)
         {
             //bool createOrJoin = false;
-            bool whiteSide = rGame.playerColor == "white" ? true : false;
+            //bool isWhite = rGame.playerColor == "white" ? true : false;
 
             // enumerates all games with "play" status and returns only a game with the minimum ID 
             Game game = db
                 .Games
-                .Where(g => g.Status == "wait" && ((whiteSide && g.White_ID == 0) ||
-                                                   (!whiteSide && g.Black_ID == 0))) 
+                .Where(g =>
+                       // new connect
+                       (g.Status == "wait" && ((r.playerColor == "white" && (g.White_ID == 0 || g.White_ID == r.playerID)) ||
+                                               (r.playerColor == "black" && (g.Black_ID == 0 || g.Black_ID == r.playerID)))) 
+                        || // or reconnect
+                        (g.Status == "play" && ((r.playerColor == "white" && g.White_ID == r.playerID)) ||
+                                                (r.playerColor == "black" && g.Black_ID == r.playerID)) )
                 .OrderBy(g => g.ID)
                 .FirstOrDefault();
 
             if (game == null)
             {
-                game = CreateGame(rGame);
+                game = CreateGame(r);
                 //createOrJoin = true;
             }
             else
             {
-                game = JoinGame(game, rGame);
+                game = JoinGame(game, r);
             }
 
             GameInfo gameInfo = new GameInfo();
@@ -196,15 +201,14 @@ namespace ChessAPI.Models
             if (nextChess.fen == game.FEN) 
                 return gameState;
 
+            UpdateGame(game, nextChess);
+
             SaveMove(game.ID, 
                      chess.GetCurrentPlayerColor() == Color.white ? (int)game.White_ID : (int)game.Black_ID,
                      move,
                      game.Result,
                      nextChess);
 
-            UpdateGame(game, nextChess);
-
-  
             gameState.gameID = game.ID;
             gameState.FEN = game.FEN;
             gameState.status = game.Status;
@@ -216,7 +220,37 @@ namespace ChessAPI.Models
 
             return gameState;
         }
-         
+
+        /*
+        bool CheckOffer(Game game, string move)
+        {
+            string[] parts = move.Split();// split by ' '
+
+            if (parts.Length == 2)
+            {
+                if (parts[1] == "draw")
+                {
+                    game.Result = parts[1];
+                    game.Winner_ID = 
+                    db.Entry(game).State = System.Data.Entity.EntityState.Modified;// we commit updates to database
+                    db.SaveChanges();
+                    return true;
+                }
+                if (parts[1] == "resign")
+                {
+                    game.Result = parts[1];
+                    game.Winner_ID =
+                    game.Status = "completed";
+
+                    db.Entry(game).State = System.Data.Entity.EntityState.Modified;// we commit updates to database
+                    db.SaveChanges();
+                    return true;
+                }
+            }
+            return false;
+        }
+        */
+
         void SaveMove(int gameID, int playerID, string fenMove, string result, Chess chess)
         {
             Move move = new Move();
@@ -272,7 +306,7 @@ namespace ChessAPI.Models
             return "";
         }
 
-        /*
+
         string GetWinnerColor(Game game)
         {
             if (game.Winner_ID == game.White_ID)
@@ -281,6 +315,5 @@ namespace ChessAPI.Models
                 return "black";
             return "";
         }
-        */
     }
 }
