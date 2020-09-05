@@ -11,8 +11,8 @@ namespace ChessAPI.Models
         public string FEN;
         public string status;//play, completed
         public string lastMove;// Pe2e4
+        public string lastMoveColor;// black, white
         public string offer;// draw, resign
         public string result;// draw, resign, checkmate, stalemate
-        public string winnerColor;// black, white
     }
 }

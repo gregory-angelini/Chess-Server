@@ -8,6 +8,6 @@ namespace ChessAPI.Models
     public class RequestedGame
     {
         public int playerID;
-        public string yourColor;// white, black
+        public string playerColor;// white, black
     }
 }
