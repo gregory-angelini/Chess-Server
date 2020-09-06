@@ -22,11 +22,11 @@ namespace ChessAPI
             
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}/{move}",
+                routeTemplate: "api/{controller}/{id}/{color}",
                 defaults: new 
                 { 
                     id = RouteParameter.Optional,
-                    move = RouteParameter.Optional
+                    color = RouteParameter.Optional
                 }
             );
         }

@@ -51,16 +51,16 @@ namespace ChessAPI.Models
             return gameInfo;
         }
 
-        Game JoinGame(Game game, RequestedGame rGame)
+        Game JoinGame(Game game, RequestedGame r)
         {
-            if (rGame.playerColor == "white")
+            if (r.playerColor == "white")
             {
-                game.White_ID = rGame.playerID;
+                game.White_ID = r.playerID;
             }
 
-            if (rGame.playerColor == "black")
+            if (r.playerColor == "black")
             {
-                game.Black_ID = rGame.playerID;
+                game.Black_ID = r.playerID;
             }
             game.Status = "play";
 
@@ -70,7 +70,7 @@ namespace ChessAPI.Models
             return game;
         }
 
-        Game CreateGame(RequestedGame rGame)
+        Game CreateGame(RequestedGame r)
         {
             Game game = new Game();
 
@@ -78,14 +78,14 @@ namespace ChessAPI.Models
             game.FEN = chess.fen;
             game.Status = "wait";
 
-            if (rGame.playerColor == "white")
+            if (r.playerColor == "white")
             {
-                game.White_ID = rGame.playerID;
+                game.White_ID = r.playerID;
             }
 
-            if (rGame.playerColor == "black")
+            if (r.playerColor == "black")
             {
-                game.Black_ID = rGame.playerID;
+                game.Black_ID = r.playerID;
             }
 
             db.Games.Add(game);
@@ -125,6 +125,36 @@ namespace ChessAPI.Models
                 .OrderByDescending(g => g.ID)
                 .FirstOrDefault();
             return move;
+        }
+
+        public PlayerInfo GetPlayer(int gameID, string color)
+        {
+            PlayerInfo playerInfo = new PlayerInfo();
+
+            Game game = db.Games.Find(gameID);
+            if (game == null)
+                return playerInfo;
+
+            int playerID = GetPlayerByColor(game, color);
+
+            Player player = db
+               .Players
+               .Where(g => g.ID == playerID).FirstOrDefault();
+           
+            playerInfo.playerName = player.Name;
+            playerInfo.playerID = player.ID;
+
+            return playerInfo;
+        }
+
+        int GetPlayerByColor(Game game, string color)
+        {
+            if (color == "white")
+                return game.White_ID;
+
+            if(color == "black")
+                return game.Black_ID;
+            return 0;
         }
 
         public PlayerInfo GetPlayer(Player define)
@@ -280,6 +310,7 @@ namespace ChessAPI.Models
         {
             if (game.White_ID == playerID)
                 return "white";
+
             if (game.Black_ID == playerID)
                 return "black";
             return "";

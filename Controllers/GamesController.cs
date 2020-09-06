@@ -18,10 +18,10 @@ namespace ChessAPI.Controllers
         ModelChessDB db = new ModelChessDB();
 
         // POST: api/Games
-        public GameInfo PostGame(RequestedGame rGame)
+        public GameInfo PostGame(RequestedGame r)
         {
             Logic logic = new Logic();
-            return logic.GetGame(rGame);
+            return logic.GetGame(r);
         }
 
 

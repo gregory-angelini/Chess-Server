@@ -23,6 +23,12 @@ namespace ChessAPI.Controllers
             return logic.GetPlayer(player);
         }
 
+        // GET: api/Players/id/color
+        public PlayerInfo GetPlayer(int id, string color)
+        {
+            Logic logic = new Logic();
+            return logic.GetPlayer(id, color);
+        }
 
         protected override void Dispose(bool disposing)
         {
