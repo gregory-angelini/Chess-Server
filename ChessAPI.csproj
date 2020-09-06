@@ -111,6 +111,7 @@
     <Compile Include="Models\Logic.cs" />
     <Compile Include="Models\ModelChessDB.cs" />
     <Compile Include="Models\Move.cs" />
+    <Compile Include="Models\MoveInfo.cs" />
     <Compile Include="Models\Player.cs" />
     <Compile Include="Models\PlayerInfo.cs" />
     <Compile Include="Models\RequestedGame.cs" />

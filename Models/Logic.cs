@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Entity.Validation;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Remoting.Messaging;
@@ -19,7 +20,10 @@ namespace ChessAPI.Models
 
         public GameInfo GetGame(RequestedGame r)
         {
-            // enumerates all games with "play" status and returns only a game with the minimum ID 
+            /* matchmaking 
+             * 1. enumerates all games with "wait" status and returns the first
+             * 2. we're looking for a game with "white" or "black" empty slot
+             * 3. we can reconnect to our game after a while */
             Game game = db
                 .Games
                 .Where(g =>
@@ -27,15 +31,14 @@ namespace ChessAPI.Models
                        (g.Status == "wait" && ((r.playerColor == "white" && (g.White_ID == 0 || g.White_ID == r.playerID)) ||
                                                (r.playerColor == "black" && (g.Black_ID == 0 || g.Black_ID == r.playerID)))) 
                         || // or reconnect
-                        (g.Status == "play" && ((r.playerColor == "white" && g.White_ID == r.playerID)) ||
-                                                (r.playerColor == "black" && g.Black_ID == r.playerID)) )
+                       (g.Status == "play" && ((r.playerColor == "white" && g.White_ID == r.playerID)) ||
+                                               (r.playerColor == "black" && g.Black_ID == r.playerID)) )
                 .OrderBy(g => g.ID)
                 .FirstOrDefault();
 
             if (game == null)
             {
                 game = CreateGame(r);
-                //createOrJoin = true;
             }
             else
             {
@@ -102,51 +105,26 @@ namespace ChessAPI.Models
             if (game.Status != "play") // we process only running games
                 return gameState;
 
+            Move move = GetLastMove(game.ID);
+
             gameState.gameID = game.ID;
             gameState.FEN = game.FEN;
             gameState.status = game.Status;
-            gameState.lastMove = GetLastMove(game.ID); 
-            gameState.lastMoveColor = GetLastMoveColor(gameState.lastMove);
+            gameState.lastMove = move.FenMove;
+            gameState.lastMoveColor = GetPlayerColor(game, move.Player_ID);
             gameState.result = game.Result; 
              
             return gameState;
         }
 
-        /*
-        Player FindPlayer(int ID)
-        {
-            // enumerates all players and returns only the player with the same ID
-            Player player = db
-                .Players
-                .Where(g => g.ID == ID).FirstOrDefault();
-            return player;
-        }*/
-
-        string GetLastMoveColor(string fenMove)
-        {
-            if(!string.IsNullOrEmpty(fenMove))
-            {
-                if(char.IsUpper(fenMove[0]))
-                {
-                    return "white";
-                }
-                else return "black";
-            }
-            return "";
-        }
-
-        string GetLastMove(int gameID)
+        Move GetLastMove(int gameID)
         {
             Move move = db
                 .Moves
                 .Where(g => g.Game_ID == gameID)
                 .OrderByDescending(g => g.ID)
                 .FirstOrDefault();
-
-            if (move != null)
-                return move.FenMove;
-
-            return "";
+            return move;
         }
 
         public PlayerInfo GetPlayer(Player define)
@@ -179,72 +157,63 @@ namespace ChessAPI.Models
             return player;
         }
 
-        public GameState GetMove(int id, string move)
+        public GameState PostMove(MoveInfo move)
         {
             GameState gameState = new GameState();
 
-            Game game = db.Games.Find(id);
+            Game game = db.Games.Find(move.gameID);
             if (game == null) 
                 return gameState;
 
             if (game.Status != "play") // we process only running games
                 return gameState;
 
-            Chess chess = new Chess(game.FEN);
-            Chess nextChess = chess.Move(move);
+            // TODO: process 'draw' and 'resign' offers 
 
-            if (nextChess.fen == game.FEN) 
+            Chess chess = new Chess(game.FEN);
+
+            if(!IsAuthorized(chess.GetCurrentPlayerColor().ToString(), 
+                             game, 
+                             move.playerID))
                 return gameState;
 
-            UpdateGame(game, nextChess);
+            Chess nextChess = chess.Move(move.fenMove);
+
+            if (nextChess.fen == game.FEN) // move is illegal
+                return gameState;
+
+            string gameResult = GetGameResult(move, nextChess);
+
+            UpdateGame(game, nextChess.fen, gameResult, move.playerID); 
 
             SaveMove(game.ID,  
-                     chess.GetCurrentPlayerColor() == Color.white ? (int)game.White_ID : (int)game.Black_ID,// who made the move
-                     move,
-                     game.Result,// result after the move
-                     chess.fen);// game before the move
+                     move.playerID,
+                     chess.fen,// game state before the move
+                     move.fenMove,
+                     gameResult);
 
             gameState.gameID = game.ID;
             gameState.FEN = game.FEN;
             gameState.status = game.Status;
-            gameState.lastMove = move;
-            gameState.lastMoveColor = GetLastMoveColor(move);
+            gameState.lastMove = move.fenMove;
+            gameState.lastMoveColor = GetPlayerColor(game, move.playerID);
             gameState.result = game.Result;
 
             return gameState;
         }
 
-        /*
-        bool CheckOffer(Game game, string move)
+        bool IsAuthorized(string curMoveColor, Game game, int playerID)
         {
-            string[] parts = move.Split();// split by ' '
-
-            if (parts.Length == 2)
+            if ((curMoveColor == "white" && game.White_ID == playerID) ||
+                (curMoveColor == "black" && game.Black_ID == playerID))
             {
-                if (parts[1] == "draw")
-                {
-                    game.Result = parts[1];
-                    game.Winner_ID = 
-                    db.Entry(game).State = System.Data.Entity.EntityState.Modified;// we commit updates to database
-                    db.SaveChanges();
-                    return true;
-                }
-                if (parts[1] == "resign")
-                {
-                    game.Result = parts[1];
-                    game.Winner_ID =
-                    game.Status = "completed";
-
-                    db.Entry(game).State = System.Data.Entity.EntityState.Modified;// we commit updates to database
-                    db.SaveChanges();
-                    return true;
-                }
+                return true;
             }
             return false;
         }
-        */
+       
 
-        void SaveMove(int gameID, int playerID, string fenMove, string result, string FEN)
+        void SaveMove(int gameID, int playerID, string FEN, string fenMove, string result)
         {
             Move move = new Move();
             move.Game_ID = gameID;
@@ -257,37 +226,45 @@ namespace ChessAPI.Models
             db.SaveChanges();
         }
 
-        void UpdateGame(Game game, Chess chess)
+        void UpdateGame(Game game, string FEN, string gameResult, int playerID)
         {
-            game.FEN = chess.fen;
-
-            game.Result = GetResult(chess);
-
-            if (game.Result.Length > 0)
+            game.FEN = FEN;
+            
+            if (gameResult.Length > 0)
             {
                 game.Status = "completed";
-
-                if (game.Result == "checkmate")
-                {
-                    switch (chess.GetCurrentPlayerColor())
-                    {
-                        case Color.white:
-                            game.Winner_ID = game.White_ID;
-                            break;
-
-                        case Color.black:
-                            game.Winner_ID = game.Black_ID;
-                            break;
-                    }
-                }
             }
+                
+            if (gameResult == "checkmate") 
+            {
+                game.Winner_ID = playerID;
+            }
+            else if (gameResult == "resign")
+            {
+                game.Winner_ID = GetOpponentOf(game, playerID);
+            }
+            
+            game.Result = gameResult;
 
             db.Entry(game).State = System.Data.Entity.EntityState.Modified;// we commit updates to database
             db.SaveChanges();
         }
 
-        string GetResult(Chess chess)
+        int GetOpponentOf(Game game, int playerID)
         {
+            if (game.White_ID == playerID) 
+                return game.Black_ID;
+            else if (game.Black_ID == playerID)
+                return game.White_ID;
+
+            return 0;
+        }
+
+        string GetGameResult(MoveInfo move, Chess chess)
+        {
+            if (move.resignOffer)
+                return "resign";
+
             if (chess.IsCheckmate())
             {
                 return "checkmate";
@@ -299,16 +276,13 @@ namespace ChessAPI.Models
             return "";
         }
 
-
-        /*
-        string GetWinnerColor(Game game)
+        string GetPlayerColor(Game game, int playerID)
         {
-            if (game.Winner_ID == game.White_ID)
+            if (game.White_ID == playerID)
                 return "white";
-            if (game.Winner_ID == game.Black_ID)
+            if (game.Black_ID == playerID)
                 return "black";
             return "";
         }
-        */
     }
 }

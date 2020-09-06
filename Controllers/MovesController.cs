@@ -17,11 +17,11 @@ namespace ChessAPI.Controllers
         private ModelChessDB db = new ModelChessDB();
 
 
-        // GET: api/Moves/5/Pe2e4
-        public GameState GetMove(int id, string move)
+        // POST: api/Moves/5/Pe2e4
+        public GameState PostMove(MoveInfo move)
         {
             Logic logic = new Logic();
-            return logic.GetMove(id, move);
+            return logic.PostMove(move);
         }
 
         /*
