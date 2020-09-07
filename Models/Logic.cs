@@ -74,7 +74,7 @@ namespace ChessAPI.Models
         {
             Game game = new Game();
 
-            Chess chess = new Chess();
+            Chess chess = new Chess("r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1");
             game.FEN = chess.fen;
             game.Status = "wait";
 
@@ -106,12 +106,14 @@ namespace ChessAPI.Models
                 return gameState;
 
             Move move = GetLastMove(game.ID);
+            string lastMove = move != null ? move.FenMove : "";
+            string lastMoveColor = move != null ? GetPlayerColor(game, move.Player_ID) : "";
 
             gameState.gameID = game.ID;
             gameState.FEN = game.FEN;
             gameState.status = game.Status;
-            gameState.lastMove = move.FenMove;
-            gameState.lastMoveColor = GetPlayerColor(game, move.Player_ID);
+            gameState.lastMove = lastMove;
+            gameState.lastMoveColor = lastMoveColor;
             gameState.result = game.Result; 
              
             return gameState;
@@ -202,7 +204,7 @@ namespace ChessAPI.Models
 
             Chess chess = new Chess(game.FEN);
 
-            if(!IsAuthorized(chess.GetCurrentPlayerColor().ToString(), 
+            if(!IsAuthorized(chess.GetMoveColor().ToString(), 
                              game, 
                              move.playerID))
                 return gameState;
