@@ -4,25 +4,34 @@ using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using ChessAPI.Models;
 
 namespace ChessAPI.Controllers
 {
-    public class MovesController : ApiController
+    public class MovesController : CommonApiController
     {
         private ModelChessDB db = new ModelChessDB();
 
 
         // POST: api/Moves/5/Pe2e4
-        public GameState PostMove(MoveInfo move)
+        [ResponseType(typeof(GameState))]
+        public IHttpActionResult PostMove(MoveInfo move)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             Logic logic = new Logic();
-            return logic.PostMove(move);
+            GameState g = logic.PostMove(move);
+            if (g == null)
+                return NotFound();
+            return Created("move", g);
         }
+
+        
 
         /*
         // GET: api/Moves

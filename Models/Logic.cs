@@ -26,32 +26,23 @@ namespace ChessAPI.Models
              * 3. we can reconnect to our game after a while */
             Game game = db
                 .Games
+                .OrderByDescending(g => g.ID)
                 .Where(g =>
                        // new connect
-                       (g.Status == "wait" && ((r.playerColor == "white" && (g.White_ID == 0 || g.White_ID == r.playerID)) ||
-                                               (r.playerColor == "black" && (g.Black_ID == 0 || g.Black_ID == r.playerID)))) 
+                       (g.Status == "wait" && ((r.playerColor == "white" && g.White_ID == 0) ||
+                                               (r.playerColor == "black" && g.Black_ID == 0)))
                         || // or reconnect
-                       (g.Status == "play" && ((r.playerColor == "white" && g.White_ID == r.playerID)) ||
-                                               (r.playerColor == "black" && g.Black_ID == r.playerID)) )
-                .OrderBy(g => g.ID)
+                       (g.Status == "play" && ((r.playerColor == "white" && g.White_ID == r.playerID) ||
+                                               (r.playerColor == "black" && g.Black_ID == r.playerID))) )
                 .FirstOrDefault();
 
             if (game == null)
-            {
-                game = CreateGame(r);
-            }
-            else
-            {
-                game = JoinGame(game, r);
-            }
+                return null; 
 
-            GameInfo gameInfo = new GameInfo();
-            gameInfo.gameID = game.ID;
-            gameInfo.FEN = game.FEN;
-            return gameInfo;
+            return JoinGame(game, r);
         }
 
-        Game JoinGame(Game game, RequestedGame r)
+        GameInfo JoinGame(Game game, RequestedGame r)
         {
             if (r.playerColor == "white")
             {
@@ -67,10 +58,13 @@ namespace ChessAPI.Models
             db.Entry(game).State = System.Data.Entity.EntityState.Modified;// we commit updates to database
             db.SaveChanges();
 
-            return game;
+            GameInfo gameInfo = new GameInfo();
+            gameInfo.gameID = game.ID;
+            gameInfo.FEN = game.FEN;
+            return gameInfo;
         }
 
-        Game CreateGame(RequestedGame r)
+        public GameInfo CreateGame(RequestedGame r)
         {
             Game game = new Game();
 
@@ -91,24 +85,26 @@ namespace ChessAPI.Models
             db.Games.Add(game);
             db.SaveChanges();
 
-            return game;
+            GameInfo gameInfo = new GameInfo();
+            gameInfo.gameID = game.ID;
+            gameInfo.FEN = game.FEN;
+            return gameInfo;
         }
 
         public GameState GetGame(int id)
         {
-            GameState gameState = new GameState();
-
             Game game = db.Games.Find(id);
             if (game == null)
-                return gameState;
+                return null;
 
-            if (game.Status != "play") // we process only running games
-                return gameState;
+            //if (game.Status != "play") // we process only running games
+            //    return null;
 
             Move move = GetLastMove(game.ID);
             string lastMove = move != null ? move.FenMove : "";
             string lastMoveColor = move != null ? GetPlayerColor(game, move.Player_ID) : "";
 
+            GameState gameState = new GameState();
             gameState.gameID = game.ID;
             gameState.FEN = game.FEN;
             gameState.status = game.Status;
@@ -123,26 +119,29 @@ namespace ChessAPI.Models
         {
             Move move = db
                 .Moves
-                .Where(g => g.Game_ID == gameID)
                 .OrderByDescending(g => g.ID)
+                .Where(g => g.Game_ID == gameID)
                 .FirstOrDefault();
             return move;
         }
 
         public PlayerInfo GetPlayer(int gameID, string color)
         {
-            PlayerInfo playerInfo = new PlayerInfo();
-
             Game game = db.Games.Find(gameID);
             if (game == null)
-                return playerInfo;
+                return null;
 
             int playerID = GetPlayerByColor(game, color);
 
             Player player = db
                .Players
                .Where(g => g.ID == playerID).FirstOrDefault();
-           
+
+            if (player == null)
+                return null;
+
+            PlayerInfo playerInfo = new PlayerInfo();
+
             playerInfo.playerName = player.Name;
             playerInfo.playerID = player.ID;
 
@@ -167,7 +166,7 @@ namespace ChessAPI.Models
                 .Where(g => g.GUID == define.GUID).FirstOrDefault();
 
             if (player == null)
-                player = CreatePlayer(define);
+                return null;
 
             PlayerInfo playerInfo = new PlayerInfo();
             playerInfo.playerName = player.Name;
@@ -176,7 +175,7 @@ namespace ChessAPI.Models
             return playerInfo;
         }
 
-        Player CreatePlayer(Player define)
+        public PlayerInfo CreatePlayer(Player define)
         {
             Player player = new Player();
 
@@ -186,19 +185,21 @@ namespace ChessAPI.Models
             db.Players.Add(player);
             db.SaveChanges();
 
-            return player;
+            PlayerInfo playerInfo = new PlayerInfo();
+            playerInfo.playerName = player.Name;
+            playerInfo.playerID = player.ID;
+
+            return playerInfo;
         }
 
         public GameState PostMove(MoveInfo move)
         {
-            GameState gameState = new GameState();
-
             Game game = db.Games.Find(move.gameID);
             if (game == null) 
-                return gameState;
+                return null;
 
             if (game.Status != "play") // we process only running games
-                return gameState;
+                return null;
 
             // TODO: process 'draw' and 'resign' offers 
 
@@ -207,12 +208,12 @@ namespace ChessAPI.Models
             if(!IsAuthorized(chess.GetMoveColor().ToString(), 
                              game, 
                              move.playerID))
-                return gameState;
+                return null; 
 
             Chess nextChess = chess.Move(move.fenMove);
 
             if (nextChess.fen == game.FEN) // move is illegal
-                return gameState;
+                return null;
 
             string gameResult = GetGameResult(move, nextChess);
 
@@ -224,6 +225,8 @@ namespace ChessAPI.Models
                      move.fenMove,
                      gameResult);
 
+            GameState gameState = new GameState();
+
             gameState.gameID = game.ID;
             gameState.FEN = game.FEN;
             gameState.status = game.Status;
@@ -234,10 +237,10 @@ namespace ChessAPI.Models
             return gameState;
         }
 
-        bool IsAuthorized(string curMoveColor, Game game, int playerID)
+        bool IsAuthorized(string moveColor, Game game, int playerID)
         {
-            if ((curMoveColor == "white" && game.White_ID == playerID) ||
-                (curMoveColor == "black" && game.Black_ID == playerID))
+            if ((moveColor == "white" && game.White_ID == playerID) ||
+                (moveColor == "black" && game.Black_ID == playerID))
             {
                 return true;
             }

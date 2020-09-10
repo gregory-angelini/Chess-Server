@@ -18,20 +18,104 @@ namespace ChessAPI.Controllers
         ModelChessDB db = new ModelChessDB();
 
         // POST: api/Games
-        public GameInfo PostGame(RequestedGame r)
+        [ResponseType(typeof(GameInfo))]
+        public IHttpActionResult PostGame(RequestedGame r)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             Logic logic = new Logic();
-            return logic.GetGame(r);
+            GameInfo g = logic.GetGame(r);      
+            if(g == null)
+                return Created("game", logic.CreateGame(r));
+            return Ok(g);
         }
 
 
         // GET: api/Games/5
-        public GameState GetGame(int id)
+        [ResponseType(typeof(GameState))]
+        public IHttpActionResult GetGame(int id)
         {
             Logic logic = new Logic();
-            return logic.GetGame(id);
+            GameState g = logic.GetGame(id);
+            if(g == null)
+                return NotFound();
+            return Ok(g);
         }
 
+        /*
+        // POST: api/Games1
+        [ResponseType(typeof(Game))]
+        public IHttpActionResult PostGame(Game game)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            db.Games.Add(game);
+            db.SaveChanges();
+
+            return CreatedAtRoute("DefaultApi", new { id = game.ID }, game);
+        }
+        */
+
+        /*
+        // DELETE: api/Games1/5
+        [ResponseType(typeof(Game))]
+        public IHttpActionResult DeleteGame(int id)
+        {
+            Game game = db.Games.Find(id);
+            if (game == null)
+            {
+                return NotFound();
+            }
+
+            db.Games.Remove(game);
+            db.SaveChanges();
+
+            return Ok(game);
+        }
+        */
+
+        /*
+        // PUT: api/Games1/5
+        [ResponseType(typeof(void))]
+        public IHttpActionResult PutGame(int id, Game game)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (id != game.ID)
+            {
+                return BadRequest();
+            }
+
+            db.Entry(game).State = EntityState.Modified;
+
+            try
+            {
+                db.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!GameExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+        */
 
         protected override void Dispose(bool disposing)
         {
