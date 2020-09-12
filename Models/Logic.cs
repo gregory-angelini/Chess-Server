@@ -68,7 +68,7 @@ namespace ChessAPI.Models
         {
             Game game = new Game();
 
-            Chess chess = new Chess("r3k2r/1pppppp1/8/8/8/8/1PPPPPP1/R3K2R w KQkq - 0 1");
+            Chess chess = new Chess();
             game.FEN = chess.fen;
             game.Status = "wait";
 
@@ -201,7 +201,7 @@ namespace ChessAPI.Models
             if (game.Status != "play") // we process only running games
                 return null;
 
-            // TODO: process 'draw' and 'resign' offers 
+            // TODO: is move valid
 
             Chess chess = new Chess(game.FEN);
 
@@ -211,14 +211,14 @@ namespace ChessAPI.Models
                 return null; 
 
             Chess nextChess = chess.Move(move.fenMove);
-
-            if (nextChess.fen == game.FEN) // move is illegal
+            
+            if (nextChess.fen == game.FEN && !move.resignOffer) // no effect
                 return null;
 
             string gameResult = GetGameResult(move, nextChess);
 
             UpdateGame(game, nextChess.fen, gameResult, move.playerID); 
-
+             
             SaveMove(game.ID,  
                      move.playerID,
                      chess.fen,// game state before the move

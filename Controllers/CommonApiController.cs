@@ -14,21 +14,6 @@ namespace ChessAPI.Controllers
 {
     public abstract class CommonApiController : ApiController
     {
-        protected ForbiddenResult Forbidden()
-        {
-            return new ForbiddenResult(this.Request);
-        }
-
-        protected ForbiddenResult Forbidden(string reason)
-        {
-            return new ForbiddenResult(this.Request, reason);
-        }
-
-        protected NoContentResult NoContent()
-        {
-            return new NoContentResult(this.Request);
-        }
-
         public class ForbiddenResult : IHttpActionResult
         {
             private readonly HttpRequestMessage _request;
