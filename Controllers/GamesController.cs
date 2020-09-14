@@ -27,7 +27,7 @@ namespace ChessAPI.Controllers
             }
 
             Logic logic = new Logic();
-            GameInfo g = logic.GetGame(r);      
+             GameInfo g = logic.GetGame(r);      
             if(g == null)
                 return Created("game", logic.CreateGame(r));
             return Ok(g);
